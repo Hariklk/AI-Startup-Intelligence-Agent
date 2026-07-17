@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IntelliAgent — AI Startup Intelligence</title>
+  <meta name="description"
+    content="AI-powered startup intelligence dashboard with Gemini AI. Get deep investment insights instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ──────────────────────────────────────
+       ROOT TOKENS
+    ────────────────────────────────────── */
+    :root {
+      --bg: #03050d;
+      --surface: rgba(10, 18, 35, 0.85);
+      --surface2: rgba(20, 32, 55, 0.6);
+      --border: rgba(100, 220, 255, 0.12);
+      --borderH: rgba(100, 220, 255, 0.4);
+      --c1: #00e5ff;
+      /* cyan */
+      --c2: #7b5cfa;
+      /* violet */
+      --c3: #ff6b35;
+      /* orange */
+      --green: #22d68a;
+      --yellow: #fbbf24;
+      --red: #f85c5c;
+      --text: #e8f0fe;
+      --muted: #7a8fa6;
+      --dim: #3e5068;
+      --font: 'Outfit', sans-serif;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #07101f;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    /* ──────────────────────────────────────
+       CANVAS PARTICLE BG
+    ────────────────────────────────────── */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ──────────────────────────────────────
+       NAV
+    ────────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3rem;
+      height: 66px;
+      background: rgba(3, 5, 13, 0.75);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .nav-brand .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 0 18px rgba(0, 229, 255, 0.4);
+    }
+
+    .nav-brand span {
+      background: linear-gradient(90deg, var(--c1), var(--c2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 13px;
+      border-radius: 20px;
+      background: rgba(0, 229, 255, 0.07);
+      color: var(--c1);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    /* ──────────────────────────────────────
+       HERO (INPUT SCREEN)
+    ────────────────────────────────────── */
+    #input-screen {
+      position: relative;
+      z-index: 1;
+    }
+
+    #output-screen {
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Parallax orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      opacity: 0.55;
+      will-change: transform;
+    }
+
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.25), transparent 70%);
+      top: -10%;
+      left: -15%;
+    }
+
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(123, 92, 250, 0.25), transparent 70%);
+      bottom: -10%;
+      right: -10%;
+    }
+
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.2), transparent 70%);
+      top: 40%;
+      left: 60%;
+    }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c1);
+      padding: 5px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      background: rgba(0, 229, 255, 0.06);
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.8s var(--ease) both;
+    }
+
+    .hero-h1 {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1.05;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      animation: fadeUp 0.8s var(--ease) 0.1s both;
+    }
+
+    .hero-h1 .grad {
+      background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 60%, var(--c3) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.3));
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      text-align: center;
+      max-width: 520px;
+      line-height: 1.65;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.8s var(--ease) 0.2s both;
+    }
+
+    /* ──────────────────────────────────────
+       FORM CARD
+    ────────────────────────────────────── */
+    .form-card {
+      width: 100%;
+      max-width: 760px;
+      background: var(--surface);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 40px 80px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      animation: fadeUp 0.8s var(--ease) 0.3s both;
+      transition: box-shadow 0.4s var(--ease), border-color 0.4s var(--ease);
+      position: relative;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 25px;
+      z-index: -1;
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), transparent 50%, rgba(123, 92, 250, 0.15));
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .form-card:hover::before {
+      opacity: 1;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group.span2 {
+      grid-column: 1/-1;
+    }
+
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-label em {
+      color: var(--c1);
+      font-style: normal;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.95rem;
+      padding: 0.72rem 1rem;
+      outline: none;
+      transition: all 0.25s var(--ease);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--dim);
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--c1);
+      background: rgba(0, 229, 255, 0.04);
+      box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1), inset 0 1px 0 rgba(0, 229, 255, 0.05);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      resize: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a8fa6' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 15px;
+    }
+
+    .form-select option {
+      background: #0d1828;
+    }
+
+    .form-textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .cta-btn {
+      margin-top: 1.4rem;
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      color: #02040a;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+      box-shadow: 0 4px 24px rgba(0, 229, 255, 0.3);
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(-100%);
+      transition: transform 0.5s var(--ease);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 229, 255, 0.45);
+    }
+
+    .cta-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .cta-btn:active {
+      transform: translateY(0);
+    }
+
+    .cta-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* trust strip */
+    .trust-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.8s var(--ease) 0.5s both;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--dim);
+    }
+
+    .trust-item span {
+      font-size: 0.9rem;
+    }
+
+    /* ──────────────────────────────────────
+       LOADING OVERLAY
+    ────────────────────────────────────── */
+    .loader-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(3, 5, 13, 0.96);
+      backdrop-filter: blur(20px);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .loader-overlay.on {
+      display: flex;
+    }
+
+    .loader-ring-wrap {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .loader-ring-wrap::before,
+    .loader-ring-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+    }
+
+    .loader-ring-wrap::before {
+      border-top-color: var(--c1);
+      animation: spin 0.9s linear infinite;
+    }
+
+    .loader-ring-wrap::after {
+      inset: 10px;
+      border-top-color: var(--c2);
+      animation: spin 0.7s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    .loader-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .loader-step {
+      font-size: 0.85rem;
+      color: var(--dim);
+      opacity: 0;
+      transition: opacity 0.4s, color 0.4s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .loader-step.active {
+      opacity: 1;
+      color: var(--muted);
+    }
+
+    .loader-step.done {
+      opacity: 1;
+      color: var(--green);
+    }
+
+    .loader-step .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ──────────────────────────────────────
+       OUTPUT DASHBOARD
+    ────────────────────────────────────── */
+    .dash-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 80px 2rem 4rem;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.87rem;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+      margin-bottom: 2rem;
+    }
+
+    .back-btn:hover {
+      color: var(--c1);
+      border-color: var(--borderH);
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    /* COMPANY HERO BAND */
+    .co-band {
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .co-band-glow {
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .co-left {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .co-avatar {
+      width: 62px;
+      height: 62px;
+      border-radius: 14px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #02040a;
+      box-shadow: 0 0 28px rgba(0, 229, 255, 0.35);
+    }
+
+    .co-info h2 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .co-chips {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 3px 11px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+    }
+
+    .stage-pill {
+      padding: 0.55rem 1.4rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .s-seed {
+      background: rgba(251, 191, 36, 0.1);
+      color: var(--yellow);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .s-a {
+      background: rgba(0, 229, 255, 0.08);
+      color: var(--c1);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+    }
+
+    .s-b {
+      background: rgba(123, 92, 250, 0.1);
+      color: var(--c2);
+      border: 1px solid rgba(123, 92, 250, 0.3);
+    }
+
+    .s-growth {
+      background: rgba(34, 214, 138, 0.1);
+      color: var(--green);
+      border: 1px solid rgba(34, 214, 138, 0.3);
+    }
+
+    .s-other {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width:900px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width:520px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.4rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .kpi:hover {
+      transform: translateY(-4px);
+      border-color: var(--borderH);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+    }
+
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--kpi-grad);
+    }
+
+    .kpi-lbl {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    .kpi-icon {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 1.3rem;
+      opacity: 0.25;
+    }
+
+    /* REC BANNER */
+    .rec-banner {
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--rc);
+      background: var(--rb);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rec-banner-glow {
+      position: absolute;
+      left: -40px;
+      top: -40px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--rc-glow), transparent 70%);
+      pointer-events: none;
+    }
+
+    .rec-emo {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .rec-lbl {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--rc);
+    }
+
+    .rec-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0.2rem 0 0.4rem;
+    }
+
+    .rec-reason {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* MAIN GRID */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+    }
+
+    @media (max-width:1000px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.6rem 1.8rem;
+      transition: border-color 0.3s;
+    }
+
+    .card:hover {
+      border-color: rgba(100, 220, 255, 0.22);
+    }
+
+    .card-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.2rem;
+    }
+
+    .card-title::before {
+      content: '';
+      width: 3px;
+      height: 13px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--c1), var(--c2));
+    }
+
+    /* SUMMARY TEXT */
+    .summary-text {
+      font-size: 0.94rem;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    /* SCORE BARS */
+    .score-row {
+      margin-bottom: 0.85rem;
+    }
+
+    .score-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+      font-size: 0.82rem;
+    }
+
+    .score-meta span:first-child {
+      color: var(--muted);
+    }
+
+    .score-track {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--sf-grad);
+      width: 0;
+      transition: width 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* SIGNALS */
+    .signal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .signal {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      transition: all 0.25s var(--ease);
+      cursor: default;
+    }
+
+    .signal:hover {
+      background: rgba(0, 229, 255, 0.04);
+      border-color: rgba(0, 229, 255, 0.18);
+      transform: translateX(5px);
+    }
+
+    .sig-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .sig-type {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .sig-text {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    /* STRENGTH / RISK */
+    .sr-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+    }
+
+    .sr-item {
+      padding: 0.9rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      transition: transform 0.25s;
+    }
+
+    .sr-item:hover {
+      transform: scale(1.025);
+    }
+
+    .sr-item.pos {
+      border-color: rgba(34, 214, 138, 0.2);
+    }
+
+    .sr-item.neg {
+      border-color: rgba(248, 92, 92, 0.2);
+    }
+
+    .sr-ico {
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .sr-lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--dim);
+    }
+
+    .sr-txt {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* BULLET LIST */
+    .b-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .b-list li {
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding-left: 1.2rem;
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .b-list li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--c1);
+      font-size: 0.75rem;
+      top: 1px;
+    }
+
+    /* COMPETITOR TABLE */
+    .comp-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.86rem;
+    }
+
+    .comp-row:last-child {
+      border-bottom: none;
+    }
+
+    .comp-n {
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .comp-c {
+      color: var(--muted);
+      font-size: 0.8rem;
+      flex: 1;
+    }
+
+    .threat {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+
+    .th-h {
+      background: rgba(248, 92, 92, 0.12);
+      color: var(--red);
+    }
+
+    .th-m {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--yellow);
+    }
+
+    .th-l {
+      background: rgba(34, 214, 138, 0.12);
+      color: var(--green);
+    }
+
+    /* TRENDS */
+    .trend-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      gap: 1rem;
+    }
+
+    .trend-row:last-child {
+      border-bottom: none;
+    }
+
+    .trend-n {
+      font-size: 0.86rem;
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .trend-d {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+    }
+
+    .tr-up {
+      background: rgba(34, 214, 138, 0.12);
+      color: var(--green);
+    }
+
+    .tr-dn {
+      background: rgba(248, 92, 92, 0.12);
+      color: var(--red);
+    }
+
+    .tr-st {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--yellow);
+    }
+
+    /* EXPORT */
+    .export-bar {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .exp-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0.6rem 1.3rem;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s var(--ease);
+    }
+
+    .exp-btn:hover {
+      color: var(--c1);
+      border-color: var(--borderH);
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    /* ANIM */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fu {
+      animation: fadeUp 0.6s var(--ease) both;
+    }
+
+    .d1 {
+      animation-delay: 0.08s;
+    }
+
+    .d2 {
+      animation-delay: 0.16s;
+    }
+
+    .d3 {
+      animation-delay: 0.24s;
+    }
+
+    .d4 {
+      animation-delay: 0.32s;
+    }
+
+    .d5 {
+      animation-delay: 0.40s;
+    }
+
+    @media (max-width:640px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .sr-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        padding: 0 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="icon">⚡</div>
+      <span>IntelliAgent</span>
+    </div>
+    <span class="nav-pill">Gemini AI · Live</span>
+  </nav>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loader-overlay" id="loader">
+    <div class="loader-ring-wrap">
+      <div class="loader-icon">🧠</div>
+    </div>
+    <div class="loader-steps">
+      <div class="loader-step" id="ls1">
+        <div class="dot"></div> Initializing intelligence agents...
+      </div>
+      <div class="loader-step" id="ls2">
+        <div class="dot"></div> Scanning company signals...
+      </div>
+      <div class="loader-step" id="ls3">
+        <div class="dot"></div> Analyzing market position...
+      </div>
+      <div class="loader-step" id="ls4">
+        <div class="dot"></div> Generating AI insights with Gemini...
+      </div>
+      <div class="loader-step" id="ls5">
+        <div class="dot"></div> Compiling intelligence report...
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+     INPUT SCREEN
+═══════════════════════════════════ -->
+  <div id="input-screen">
+    <div class="hero-wrap" id="hero">
+      <div class="orb orb-1" id="orb1"></div>
+      <div class="orb orb-2" id="orb2"></div>
+      <div class="orb orb-3" id="orb3"></div>
+
+      <div class="hero-tag">Multi-Agent AI Intelligence System</div>
+
+      <h1 class="hero-h1">
+        Instant Deep Intelligence<br>
+        on <span class="grad">Any Startup</span>
+      </h1>
+      <p class="hero-sub">
+        Enter company details and our Gemini-powered AI agent will generate a comprehensive
+        investment intelligence report in seconds.
+      </p>
+
+      <div class="form-card" id="form-card">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Company Name <em>*</em></label>
+            <input class="form-input" id="f_name" type="text" placeholder="e.g., OpenAI, Stripe, Notion" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Website</label>
+            <input class="form-input" id="f_site" type="text" placeholder="e.g., openai.com" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Industry <em>*</em></label>
+            <select class="form-select" id="f_ind">
+              <option value="" disabled selected>Select Industry</option>
+              <option>Artificial Intelligence</option>
+              <option>FinTech</option>
+              <option>HealthTech</option>
+              <option>EdTech</option>
+              <option>CleanTech / GreenTech</option>
+              <option>Cybersecurity</option>
+              <option>SaaS / B2B Software</option>
+              <option>E-Commerce / Marketplace</option>
+              <option>Deep Tech / Quantum</option>
+              <option>Biotech / Life Sciences</option>
+              <option>SpaceTech</option>
+              <option>AgriTech</option>
+              <option>PropTech</option>
+              <option>LegalTech</option>
+              <option>Web3 / Blockchain</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Country</label>
+            <select class="form-select" id="f_cty">
+              <option value="" disabled selected>Select Country</option>
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>India</option>
+              <option>Germany</option>
+              <option>France</option>
+              <option>Canada</option>
+              <option>Singapore</option>
+              <option>Israel</option>
+              <option>China</option>
+              <option>Australia</option>
+              <option>Netherlands</option>
+              <option>Sweden</option>
+              <option>Brazil</option>
+              <option>Japan</option>
+              <option>South Korea</option>
+              <option>UAE</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Founded Year</label>
+            <input class="form-input" id="f_year" type="number" placeholder="e.g., 2021" min="1990" max="2026" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Known Stage (Optional)</label>
+            <select class="form-select" id="f_stage">
+              <option value="" disabled selected>Stage hint...</option>
+              <option>Stealth / Pre-Seed</option>
+              <option>Seed Stage</option>
+              <option>Series A</option>
+              <option>Series B</option>
+              <option>Series C+</option>
+              <option>Growth / Scale-up</option>
+              <option>Public / IPO</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr">
+          <div class="form-group span2">
+            <label class="form-label">Description <em>*</em></label>
+            <textarea class="form-textarea" id="f_desc"
+              placeholder="Describe what the company does, its target market, and unique value proposition..."></textarea>
+          </div>
+        </div>
+        <button class="cta-btn" id="run-btn" onclick="run()">
+          ⚡ Generate Intelligence Report
+        </button>
+      </div>
+
+      <div class="trust-strip">
+        <div class="trust-item"><span>🔒</span> Secure API</div>
+        <div class="trust-item"><span>⚡</span> Powered by Gemini 2.5 Flash</div>
+        <div class="trust-item"><span>📊</span> 15+ Data Dimensions</div>
+        <div class="trust-item"><span>🎯</span> Investment-Grade Insights</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+     OUTPUT SCREEN
+═══════════════════════════════════ -->
+  <div id="output-screen">
+    <div class="dash-wrap" id="dash-wrap"></div>
+  </div>
+
+  <script>
+    /* ─── CONFIG ─── */
+    const API_KEY = 'AQ.Ab8RN6L-zLBW-drIowNlzedf6sYmuWqbLFn9O6kFA6Q_ra5R9A';
+    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + API_KEY;
+
+    /* ─── PARTICLE SYSTEM ─── */
+    (function () {
+      const cv = document.getElementById('particle-canvas');
+      const ctx = cv.getContext('2d');
+      let W, H, pts = [];
+      const N = 90;
+      const resize = () => { W = cv.width = window.innerWidth; H = cv.height = window.innerHeight; };
+      window.addEventListener('resize', resize); resize();
+      for (let i = 0; i < N; i++) pts.push({
+        x: Math.random() * 1e4, y: Math.random() * 1e4,
+        vx: (Math.random() - 0.5) * 0.18, vy: (Math.random() - 0.5) * 0.18,
+        r: Math.random() * 1.5 + 0.3, a: Math.random()
+      });
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        pts.forEach(p => {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(0,229,255,${p.a * 0.35})`; ctx.fill();
+        });
+        pts.forEach((a, i) => {
+          pts.slice(i + 1).forEach(b => {
+            const dx = a.x - b.x, dy = a.y - b.y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 130) {
+              ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+              ctx.strokeStyle = `rgba(0,229,255,${(1 - d / 130) * 0.08})`; ctx.lineWidth = 0.8; ctx.stroke();
+            }
+          });
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ─── PARALLAX ─── */
+    document.addEventListener('mousemove', e => {
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+      const o1 = document.getElementById('orb1');
+      const o2 = document.getElementById('orb2');
+      const o3 = document.getElementById('orb3');
+      const fc = document.getElementById('form-card');
+      if (o1) o1.style.transform = `translate(${dx * 30}px,${dy * 20}px)`;
+      if (o2) o2.style.transform = `translate(${-dx * 25}px,${-dy * 18}px)`;
+      if (o3) o3.style.transform = `translate(${dx * 18}px,${-dy * 22}px)`;
+      if (fc) fc.style.transform = `perspective(1200px) rotateX(${-dy * 2.5}deg) rotateY(${dx * 2.5}deg)`;
+    });
+    document.getElementById('form-card').addEventListener('mouseleave', () => {
+      document.getElementById('form-card').style.transform = 'perspective(1200px) rotateX(0) rotateY(0)';
+    });
+
+    /* ─── LOADING STEPS ─── */
+    let _stepTimer = null;
+    function startLoaderSteps() {
+      const ids = ['ls1', 'ls2', 'ls3', 'ls4', 'ls5'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('active', 'done'); }
+      });
+      let i = 0;
+      _stepTimer = setInterval(() => {
+        if (i > 0) { const prev = document.getElementById(ids[i - 1]); if (prev) prev.classList.add('done'); }
+        if (i < ids.length) { const cur = document.getElementById(ids[i]); if (cur) cur.classList.add('active'); i++; }
+        else { clearInterval(_stepTimer); }
+      }, 900);
+    }
+    function stopLoader() { clearInterval(_stepTimer); document.getElementById('loader').classList.remove('on'); }
+
+    /* ─── BUILD PROMPT ─── */
+    function buildPrompt(f) {
+      return `You are an elite startup investment analyst. Analyze this startup deeply.
+
+Company: ${f.name}
+Website: ${f.site || 'N/A'}
+Industry: ${f.ind}
+Country: ${f.cty || 'N/A'}
+Founded: ${f.year || 'N/A'}
+Stage Hint: ${f.stage || 'Unknown'}
+Description: ${f.desc}
+
+Return ONLY a valid JSON object (absolutely no markdown fences or extra text). Use this exact schema:
+{
+  "executive_summary": "3-4 sentence strategic overview",
+  "growth_stage": "Stealth/Pre-Seed | Seed | Series A | Series B | Growth | Public",
+  "funding_estimate": "e.g. $8M–$20M Series A",
+  "market_size": "e.g. $120B TAM by 2028",
+  "employee_estimate": "e.g. 40–120",
+  "revenue_stage": "e.g. $1M–$5M ARR",
+  "investment_score": 74,
+  "recommendation": "Strong Buy | Buy | Watch | Pass",
+  "recommendation_reason": "1-2 sentence justification",
+  "growth_score": 78,
+  "innovation_score": 82,
+  "market_fit_score": 70,
+  "team_score": 66,
+  "signals": [
+    {"type":"Funding","text":"signal detail"},
+    {"type":"Hiring","text":"signal detail"},
+    {"type":"Product","text":"signal detail"},
+    {"type":"Partnership","text":"signal detail"}
+  ],
+  "strengths": ["Strength 1","Strength 2","Strength 3"],
+  "risks": ["Risk 1","Risk 2","Risk 3"],
+  "opportunities": ["Opportunity 1","Opportunity 2","Opportunity 3"],
+  "competitors": [
+    {"name":"Competitor A","category":"Direct","threat":"High"},
+    {"name":"Competitor B","category":"Indirect","threat":"Medium"},
+    {"name":"Competitor C","category":"Emerging","threat":"Low"}
+  ],
+  "market_trends": [
+    {"name":"Trend A","direction":"Growing"},
+    {"name":"Trend B","direction":"Stable"},
+    {"name":"Trend C","direction":"Declining"}
+  ],
+  "key_metrics": ["Metric 1","Metric 2","Metric 3"],
+  "analyst_note": "2-sentence final perspective"
+}`;
+    }
+
+    /* ─── MAIN RUN ─── */
+    let _data = null;
+    async function run() {
+      const f = {
+        name: document.getElementById('f_name').value.trim(),
+        site: document.getElementById('f_site').value.trim(),
+        ind: document.getElementById('f_ind').value,
+        cty: document.getElementById('f_cty').value,
+        year: document.getElementById('f_year').value,
+        stage: document.getElementById('f_stage').value,
+        desc: document.getElementById('f_desc').value.trim()
+      };
+      if (!f.name || !f.ind || !f.desc) { alert('Please fill Company Name, Industry and Description.'); return; }
+
+      document.getElementById('run-btn').disabled = true;
+      document.getElementById('loader').classList.add('on');
+      startLoaderSteps();
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "You are an elite startup investment analyst. Respond only in valid JSON, no markdown fences.\n\n" + buildPrompt(f) }] }],
+            generationConfig: {
+              temperature: 0.65,
+              maxOutputTokens: 2800,
+              responseMimeType: "application/json"
+            }
+          })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+        const json = await res.json();
+        let raw = json.candidates[0].content.parts[0].text.trim();
+        raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '');
+        _data = JSON.parse(raw);
+        stopLoader();
+        renderDash(_data, f);
+      } catch (err) {
+        stopLoader();
+        document.getElementById('run-btn').disabled = false;
+        alert(`Gemini AI Error: ${err.message}`);
+        console.error(err);
+      }
+    }
+
+    /* ─── HELPERS ─── */
+    const scoreColor = v => v >= 75 ? 'linear-gradient(90deg,#22d68a,#4ade80)' : v >= 55 ? 'linear-gradient(90deg,#fbbf24,#f59e0b)' : 'linear-gradient(90deg,#f85c5c,#ef4444)';
+    const scoreText = v => v >= 75 ? '#22d68a' : v >= 55 ? '#fbbf24' : '#f85c5c';
+    const stageClass = s => {
+      if (!s) return 's-other';
+      const sl = s.toLowerCase();
+      if (sl.includes('seed') || sl.includes('pre')) return 's-seed';
+      if (sl.includes('series a')) return 's-a';
+      if (sl.includes('series b')) return 's-b';
+      if (sl.includes('growth') || sl.includes('public')) return 's-growth';
+      return 's-other';
+    };
+    const sigColor = t => ({
+      Funding: '#00e5ff', Hiring: '#22d68a', Product: '#7b5cfa',
+      Partnership: '#fbbf24', Acquisition: '#f7931e', Launch: '#a855f7'
+    }[t] || '#7a8fa6');
+    const recCfg = r => ({
+      'Strong Buy': { rb: 'rgba(34,214,138,0.06)', rc: '#22d68a', rcg: 'rgba(34,214,138,0.15)', emo: '🚀', title: 'Strong Buy — High-Conviction Opportunity' },
+      'Buy': { rb: 'rgba(0,229,255,0.05)', rc: '#00e5ff', rcg: 'rgba(0,229,255,0.12)', emo: '💡', title: 'Buy — Promising Investment Opportunity' },
+      'Watch': { rb: 'rgba(251,191,36,0.05)', rc: '#fbbf24', rcg: 'rgba(251,191,36,0.12)', emo: '👁', title: 'Watch — Monitor for Key Developments' },
+      'Pass': { rb: 'rgba(248,92,92,0.05)', rc: '#f85c5c', rcg: 'rgba(248,92,92,0.12)', emo: '⏸', title: 'Pass — Not Recommended at This Time' }
+    }[r] || { rb: 'rgba(255,255,255,0.04)', rc: '#7a8fa6', rcg: 'transparent', emo: '📋', title: 'Analysis Complete' });
+    const threatClass = t => ({ 'High': 'th-h', 'Medium': 'th-m', 'Low': 'th-l' }[t] || 'th-m');
+    const trendClass = d => ({ 'Growing': 'tr-up', 'Declining': 'tr-dn', 'Stable': 'tr-st' }[d] || 'tr-st');
+    const trendArrow = d => ({ 'Growing': '↑', 'Declining': '↓', 'Stable': '→' }[d] || '→');
+
+    /* ─── RENDER DASHBOARD ─── */
+    function renderDash(d, f) {
+      document.getElementById('input-screen').style.display = 'none';
+      document.getElementById('output-screen').style.display = 'block';
+
+      const initials = f.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      const rc = recCfg(d.recommendation);
+
+      const kpis = [
+        { lbl: 'Investment Score', val: `${d.investment_score}<span style="font-size:1rem;color:var(--dim)">/100</span>`, sub: d.recommendation, grad: `linear-gradient(90deg,${scoreText(d.investment_score)},transparent)`, icon: '🎯', vc: scoreText(d.investment_score) },
+        { lbl: 'Market Size', val: d.market_size, sub: 'Total Addressable Market', grad: 'linear-gradient(90deg,#7b5cfa,transparent)', icon: '🌐', vc: '#7b5cfa' },
+        { lbl: 'Funding Estimate', val: d.funding_estimate, sub: 'Estimated Raised', grad: 'linear-gradient(90deg,#f7931e,transparent)', icon: '💰', vc: '#f7931e' },
+        { lbl: 'Revenue Stage', val: d.revenue_stage, sub: `~${d.employee_estimate} employees`, grad: 'linear-gradient(90deg,#22d68a,transparent)', icon: '📈', vc: '#22d68a' },
+      ];
+
+      const scores = [
+        { lbl: 'Growth Potential', val: d.growth_score },
+        { lbl: 'Innovation Index', val: d.innovation_score },
+        { lbl: 'Market Fit', val: d.market_fit_score },
+        { lbl: 'Team Strength', val: d.team_score },
+      ];
+
+      const srItems = [
+        ...(d.strengths || []).slice(0, 2).map(s => ({ cls: 'pos', ico: '✅', lbl: 'Strength', txt: s })),
+        ...(d.risks || []).slice(0, 2).map(r => ({ cls: 'neg', ico: '⚠️', lbl: 'Risk', txt: r })),
+      ];
+
+      const html = `
+    <button class="back-btn" onclick="goBack()">← New Analysis</button>
+
+    <!-- COMPANY BAND -->
+    <div class="co-band fu">
+      <div class="co-band-glow"></div>
+      <div class="co-left">
+        <div class="co-avatar">${initials}</div>
+        <div class="co-info">
+          <h2>${f.name}</h2>
+          <div class="co-chips">
+            ${f.ind ? `<span class="chip">⚡ ${f.ind}</span>` : ''}
+            ${f.cty ? `<span class="chip">🌍 ${f.cty}</span>` : ''}
+            ${f.year ? `<span class="chip">📅 Est. ${f.year}</span>` : ''}
+            ${f.site ? `<a href="http://${f.site}" target="_blank" style="text-decoration:none"><span class="chip" style="color:var(--c1)">🔗 ${f.site}</span></a>` : ''}
+          </div>
+        </div>
+      </div>
+      <span class="stage-pill ${stageClass(d.growth_stage)}">${d.growth_stage}</span>
+    </div>
+
+    <!-- KPI GRID -->
+    <div class="kpi-grid fu d1">
+      ${kpis.map(k => `
+        <div class="kpi" style="--kpi-grad:${k.grad}">
+          <div class="kpi-icon">${k.icon}</div>
+          <div class="kpi-lbl">${k.lbl}</div>
+          <div class="kpi-val" style="color:${k.vc}">${k.val}</div>
+          <div class="kpi-sub">${k.sub}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- REC BANNER -->
+    <div class="rec-banner fu d2" style="--rc:${rc.rc};--rb:${rc.rb};--rc-glow:${rc.rcg}">
+      <div class="rec-banner-glow"></div>
+      <div class="rec-emo">${rc.emo}</div>
+      <div>
+        <div class="rec-lbl">${d.recommendation}</div>
+        <div class="rec-title">${rc.title}</div>
+        <div class="rec-reason">${d.recommendation_reason}</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid fu d3">
+      <!-- LEFT COL -->
+      <div class="col">
+        <div class="card">
+          <div class="card-title">Executive Summary</div>
+          <p class="summary-text">${d.executive_summary}</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Intelligence Signals</div>
+          <div class="signal-list">
+            ${(d.signals || []).map(s => `
+              <div class="signal">
+                <div class="sig-dot" style="background:${sigColor(s.type)};color:${sigColor(s.type)}"></div>
+                <div>
+                  <div class="sig-type" style="color:${sigColor(s.type)}">${s.type}</div>
+                  <div class="sig-text">${s.text}</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Strengths &amp; Risks</div>
+          <div class="sr-grid">
+            ${srItems.map(it => `
+              <div class="sr-item ${it.cls}">
+                <div class="sr-ico">${it.ico}</div>
+                <div class="sr-lbl">${it.lbl}</div>
+                <div class="sr-txt">${it.txt}</div>
+              </div>`).join('')}
+          </div>
+          <div style="margin-top:1.2rem">
+            <div class="card-title" style="margin-bottom:0.8rem">Opportunities</div>
+            <ul class="b-list">${(d.opportunities || []).map(o => `<li>${o}</li>`).join('')}</ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Analyst Note</div>
+          <p class="summary-text">${d.analyst_note}</p>
+        </div>
+
+        <div class="export-bar">
+          <button class="exp-btn" onclick="exportJSON()">📋 Export JSON</button>
+          <button class="exp-btn" onclick="exportMD()">📝 Export Markdown</button>
+          <button class="exp-btn" onclick="window.print()">🖨️ Print / PDF</button>
+        </div>
+      </div>
+
+      <!-- RIGHT COL -->
+      <div class="col">
+        <div class="card">
+          <div class="card-title">Performance Scores</div>
+          ${scores.map(s => `
+            <div class="score-row">
+              <div class="score-meta">
+                <span>${s.lbl}</span>
+                <span style="color:${scoreText(s.val)};font-weight:700">${s.val}/100</span>
+              </div>
+              <div class="score-track">
+                <div class="score-fill" data-val="${s.val}" style="--sf-grad:${scoreColor(s.val)}"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <div class="card-title">Competitor Landscape</div>
+          ${(d.competitors || []).map((c, i) => `
+            <div class="comp-row">
+              <span style="color:var(--dim);font-weight:600;width:18px">#${i + 1}</span>
+              <span class="comp-n">${c.name}</span>
+              <span class="comp-c">${c.category}</span>
+              <span class="threat ${threatClass(c.threat)}">${c.threat}</span>
+            </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <div class="card-title">Market Trends</div>
+          ${(d.market_trends || []).map(t => `
+            <div class="trend-row">
+              <span class="trend-n">${t.name}</span>
+              <span class="trend-d ${trendClass(t.direction)}">${trendArrow(t.direction)} ${t.direction}</span>
+            </div>`).join('')}
+        </div>
+
+        <div class="card">
+          <div class="card-title">Key Metrics to Watch</div>
+          <ul class="b-list">${(d.key_metrics || []).map(m => `<li>${m}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>
+  `;
+
+      const wrap = document.getElementById('dash-wrap');
+      wrap.innerHTML = html;
+      wrap.scrollIntoView({ behavior: 'smooth' });
+
+      // Animate score bars
+      setTimeout(() => {
+        wrap.querySelectorAll('.score-fill').forEach(el => {
+          el.style.width = el.dataset.val + '%';
+        });
+      }, 300);
+    }
+
+    function goBack() {
+      document.getElementById('output-screen').style.display = 'none';
+      document.getElementById('input-screen').style.display = 'block';
+      document.getElementById('run-btn').disabled = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function exportJSON() {
+      if (!_data) return;
+      const b = new Blob([JSON.stringify(_data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+      a.download = 'startup_intelligence.json'; a.click();
+    }
+    function exportMD() {
+      if (!_data) return;
+      const d = _data;
+      const md = `# Startup Intelligence Report\n\n**Score:** ${d.investment_score}/100 | **Rec:** ${d.recommendation} | **Stage:** ${d.growth_stage}\n\n## Executive Summary\n${d.executive_summary}\n\n## Recommendation\n${d.recommendation_reason}\n\n## Key Metrics\n- Market: ${d.market_size}\n- Funding: ${d.funding_estimate}\n- Revenue: ${d.revenue_stage}\n- Employees: ${d.employee_estimate}\n\n## Scores\n- Growth: ${d.growth_score}\n- Innovation: ${d.innovation_score}\n- Market Fit: ${d.market_fit_score}\n- Team: ${d.team_score}\n\n## Strengths\n${(d.strengths || []).map(s => `- ${s}`).join('\n')}\n\n## Risks\n${(d.risks || []).map(r => `- ${r}`).join('\n')}\n\n## Analyst Note\n${d.analyst_note}`;
+      const b = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+      a.download = 'intelligence_report.md'; a.click();
+    }
+  </script>
+</body>
+
+</html>
